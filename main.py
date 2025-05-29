@@ -5,6 +5,7 @@ from models import DigitRecognizerMLP
 from dataloaders import get_dataloaders
 from train import train_model
 from test import test_model
+from ui import run_ui
 
 
 # Hyperparameters
@@ -38,5 +39,11 @@ def main(model_name: str|None) -> None:
 
 
 if __name__ == "__main__":
-    model_name = argv[1] if len(argv)>1 else None
-    main(model_name)
+    if (len(argv) > 1) and (argv[1] == "ui"):
+        # show GUI for users test
+        run_ui()
+    
+    else:
+        # train model
+        model_name = argv[1] if len(argv)>1 else None
+        main(model_name)
