@@ -22,10 +22,10 @@ datasets/
 results/
 outputs/
 
-# # Model checkpoints and trained models
-# *.pth
-# *.pt
-# checkpoints/
+# Model checkpoints and trained models
+*.pth
+*.pt
+checkpoints/
 
 # VS Code settings
 .vscode/

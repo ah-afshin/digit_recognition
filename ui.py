@@ -2,7 +2,10 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
 
-from PIL import Image, ImageDraw, ImageOps
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageOps
+from PIL import ImageChops
 import torch as t
 import numpy as np
 
@@ -14,11 +17,34 @@ CANVAS_SIZE = 280
 IMG_SIZE = 28
 
 
+def crop_and_center(image: Image) -> Image:
+    # crop the white area
+    bg = Image.new("L", image.size, 0)
+    diff = ImageChops.difference(image, bg)
+    bbox = diff.getbbox()
+    if bbox:
+        image = image.crop(bbox)
+
+    # changing the image size to 20*20
+    image = image.resize((20, 20), Image.LANCZOS)
+
+    # putting it in the center of a 28*28 image
+    new_img = Image.new("L", (28, 28), 0)
+    new_img.paste(image, ((28 - 20) // 2, (28 - 20) // 2))
+    return new_img
+
+
 def preprocess(canvas_image):
     # Convert to grayscale, resize, and invert
     image = canvas_image.convert('L')
     image = ImageOps.invert(image)
     image = image.resize((IMG_SIZE, IMG_SIZE))
+    image = crop_and_center(image)
+    
+    # debug
+    image.save("debug.png")
+    
+    #  turn it to an array of floats (just like mnist images).
     image = np.array(image) / 255.0
     tensor = t.tensor(image, dtype=t.float32).unsqueeze(0).unsqueeze(0)  # [1, 1, 28, 28]
     return tensor
@@ -81,7 +107,11 @@ class DigitRecognizerApp:
         self.result_label.config(text=f"Prediction: {pred}")
 
 
-def run_ui():
+def run_ui() -> None:
     root = tk.Tk()
     app = DigitRecognizerApp(root)
     root.mainloop()
+
+
+if __name__ == "__main__":
+    run_ui()
